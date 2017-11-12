@@ -1,4 +1,4 @@
-// console.log('this is loaded');
+console.log('this is loaded');
 
 var twitterKeys = {
   consumer_key: 'F9ei2lXFFU9lnSQxP1gN0oGFh',
@@ -7,6 +7,4 @@ var twitterKeys = {
   access_token_secret: 'QLkTxvGFJOySuDPScuiI6TtCRyIzRyKSbZ5f1k36HFiSS',
 }
 
-module.exports = {
-	twitterKeys:twitterKeys
-}
+module.exports = twitterKeys;
