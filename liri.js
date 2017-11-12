@@ -1,58 +1,59 @@
-// var twit = require("./keys.js");
-
-
-
-
+// var twit = require("./keys.js"); moved to be used only when calling twitter function
+//this program will run four commands per homework assignment
+//required global variables
 var fs = require("fs");
 var proCom = process.argv[2];
 var itemSearch = getItem(process.argv);
-// console.log("procom: " + proCom + " itemSearch: " + itemSearch);
+var outputArray = ["\n-------------------------------------------"];
 
-
-
-// console.log(client);
-
+// this will get the searchItem if one is included or quotes were not used
 function getItem(input) {
+    //this will assign the value from process.argv[3] if it was in quotes or only one word no need to loop
     var search = input[3];
-
+    //if the movie title or the sone was not in quotes or more than word get the rest and add to search
     for (var i = 4; i < input.length; i++) {
         search = search + " " + input[i];
     }
+    //returns the item to search to itemSearch
     return search;
-
-
 }
 
+//function to search spotify API
 function spotifySong() {
-
+    //calls the npm node-spotify-api
     var Spotify = require('node-spotify-api');
+    //will assign the song if one was not already
     if (itemSearch) {
         song = itemSearch
     } else {
         var song = 'The Sign ace of base';
     }
+    //keys to spotify app
     var spotify = new Spotify({
         id: "793e592050b44db0b0547680bfd99ab8",
         secret: "3ae5dbc139d94ca1b9f19acdaee80c48"
     });
+    //search spotify using the npm
     spotify.search({ type: 'track', query: song }, function(err, data) {
         if (err) {
             return console.log('Error occurred: ' + err);
         }
-        // Artist(s),The song's name,A preview link of the song from Spotify,The album that 
+        // the return information from spotify for the first return
         var songInfo = data.tracks.items[0];
-        // console.log(songInfo);
-        console.log("Artist: " + songInfo.artists[0].name);
-        console.log("Song Name: " + songInfo.name);
-        console.log("Spotify link to song: " + songInfo.external_urls.spotify);
-        console.log("Albulm: " + songInfo.album.name);
-        console.log("\n -------------------------------------------\n");
+        //output for the results
+        outputArray.push("Artist: " + songInfo.artists[0].name);
+        outputArray.push("Song Name: " + songInfo.name);
+        outputArray.push("Spotify link to song: " + songInfo.external_urls.spotify);
+        outputArray.push("Albulm: " + songInfo.album.name);
+        // console.log("\n -------------------------------------------\n");
+        myOutput();
 
     });
 
 }
-
+//function for getting my tweets out of twitter
 function mytweets() {
+    //getting keys and using the twitter npm
     var twit = require("./keys.js");
     var Twitter = require('twitter')
     var client = new Twitter({
@@ -61,17 +62,16 @@ function mytweets() {
         access_token_key: twit.access_token_key,
         access_token_secret: twit.access_token_secret
     });
+    //paramaters for getting my tweets
     var params = { screen_name: 'chumpchange222', count: 20, exclude_replies: true, trim_user: true };
     client.get('statuses/user_timeline', params, function(error, tweets, response) {
         if (!error) {
-            // console.log(tweets); // The favorites. 
-            // console.log(response); // Raw response object.
-
-
+            //if no errors loop through tweets and display
             for (var i = 0; i < tweets.length; i++) {
-                console.log(tweets[i].text + " at " + tweets[i].created_at);
+                outputArray.push(tweets[i].text + " at " + tweets[i].created_at);
             }
-            console.log("\n -------------------------------------------\n");
+            myOutput();
+            // console.log("\n -------------------------------------------\n");
         } else {
             console.log(error);
         }
@@ -79,40 +79,42 @@ function mytweets() {
 
 }
 
-
+//function to get movie from omdb using their api and request npm
 function getMovie() {
+    //get keys and assing the movie to be searched
     var request = require("request");
     var movieName = itemSearch;
+    //check to see if ther is a movie to search if there is search if not go to else
     if (movieName) {
         var queryUrl = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=40e9cece";
         request(queryUrl, function(error, response, body) {
 
             // If the request is successful
             if (!error && response.statusCode === 200) {
-
-                // Parse the body of the site and recover just the imdbRating
-                // (Note: The syntax below for parsing isn't obvious. Just spend a few moments dissecting it).
-                // console.log(JSON.parse(body));
+                //if no errors then parse out and display
                 var movie = JSON.parse(body)
-                console.log(movie.Title);
-                console.log(movie.Year);
-                console.log(movie.Ratings[0].Source + ": " + movie.Ratings[0].Value);
-                console.log(movie.Ratings[1].Source + ": " + movie.Ratings[0].Value);
-                console.log(movie.Country);
-                console.log(movie.Language);
-                console.log(movie.Plot);
-                console.log(movie.Actors);
-                console.log("\n -------------------------------------------\n");
+                outputArray.push(movie.Title);
+                outputArray.push(movie.Year);
+                outputArray.push(movie.Ratings[0].Source + ": " + movie.Ratings[0].Value);
+                outputArray.push(movie.Ratings[1].Source + ": " + movie.Ratings[0].Value);
+                outputArray.push(movie.Country);
+                outputArray.push(movie.Language);
+                outputArray.push(movie.Plot);
+                outputArray.push(movie.Actors);
+                myOutput();
+
 
             }
         });
+        //if no movie was given then 
     } else {
-        console.log("If you haven't watched " + '"Mr. Nobody," then you should: http://www.imdb.com/title/tt0485947/');
-        console.log("It's on Netflix!");
+        outputArray.push("If you haven't watched " + '"Mr. Nobody," then you should: http://www.imdb.com/title/tt0485947/');
+        outputArray.push("It's on Netflix!");
+        myOutput();
     }
 
 }
-
+//do what it says function reads file using fs and process file
 function doWhatISay() {
     fs.readFile("random.txt", "utf8", function(error, data) {
 
@@ -124,15 +126,13 @@ function doWhatISay() {
         // Then split it by commas (to make it more readable)
         var dataArr = data.split(",");
 
-        // We will then re-display the content as an array for later use.
+        //assign action item and then do it
         proCom = dataArr[0];
         itemSearch = dataArr[1];
-        console.log("item 1: " + proCom);
-        // console.log("item 2: " + itemSearch);
         whatToDo();
     });
 }
-
+//this function evaluates the commands and then calls the right function if not right info then it will tell what it requires.
 function whatToDo() {
     if (proCom === "my-tweets") {
         mytweets();
@@ -141,13 +141,32 @@ function whatToDo() {
     } else if (proCom === 'movie-this') {
         getMovie();
     } else {
-        console.log(proCom + "  in what to do");
         console.log('\n type one of the following: \n my-tweets \n spotify-this-song [optional: song name] \n movie-this [optional: movie name] \n do-what-it-says \n');
 
     }
 
 }
 
+function myOutput() {
+    outputArray.push("------------------------------------------\n");
+    var info = "";
+
+
+
+
+
+    for (i = 0; i < outputArray.length; i++) {
+        info = outputArray[i]
+        fs.appendFile("./liriOut.txt", info + "\n", 'utf8', function(err) {
+            if (err) {
+                return console.log(err);
+            }
+        });
+        console.log(info);
+    }
+
+}
+//checks to see if it is do-what-it-says so it can get the items needed for the whattodo function
 if (proCom === "do-what-it-says") {
     doWhatISay();
 } else {
@@ -157,4 +176,3 @@ if (proCom === "do-what-it-says") {
 // spotifySong();
 // getMovie();
 // doWhatISay();
-console.log("\n -------------------------------------------");
