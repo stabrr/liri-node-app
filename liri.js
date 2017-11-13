@@ -146,18 +146,17 @@ function whatToDo() {
     }
 
 }
-
+//this function is to display output to a file and to the screen
 function myOutput() {
+    //spent way too much time on this because i was viewing in notepad which does not show new lines 
+    //i tried many different ways to display this in a file but this is what i had when i realized i was 
+    //opening the file wrong. it still works and is good for display to screen.
+    //this will append each time to a file called log.txt
     outputArray.push("------------------------------------------\n");
     var info = "";
-
-
-
-
-
     for (i = 0; i < outputArray.length; i++) {
         info = outputArray[i]
-        fs.appendFile("./liriOut.txt", info + "\n", 'utf8', function(err) {
+        fs.appendFile("./log.txt", info + "\n", 'utf8', function(err) {
             if (err) {
                 return console.log(err);
             }
@@ -172,7 +171,3 @@ if (proCom === "do-what-it-says") {
 } else {
     whatToDo();
 }
-// mytweets();
-// spotifySong();
-// getMovie();
-// doWhatISay();
